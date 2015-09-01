@@ -1,0 +1,79 @@
+awsudo + aws-agent
+==================
+
+Overview
+------------
+
+**awsudo** enables users to execute commands that make API calls to AWS under
+the security context of an IAM role. The IAM role is assumed only upon
+successful authentication against a SAML compliant federation service.
+
+**aws-agent** enables users to authenticate against a SAML compliant federation
+service once, after which aws-agent provides temporary credentials to awsudo
+to use.
+
+Synopsis
+------------
+
+      awsudo {role-name | role-arn} command
+     
+      aws-agent
+     
+Requirements
+------------
+
+  * UNIX, UNIX-like or GNU/Linux operating system
+  * SAML compliant federation service
+  * ruby 1.9 or above
+  * ruby gems: aws-sdk
+
+Install
+------------
+
+      sudo gem install awsudo
+
+Configuration
+------------
+
+awsudo and aws-agent expect a configuration file named .awsudo in your home directory
+containing the values for your identity provider login url and the SAML provider name
+configured in AWS. This is an example, your setup may vary:
+
+      IDP_LOGIN_URL = https://sts.example.com/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices
+      SAML_PROVIDER_NAME = ADFS
+
+In addition to .awsudo, you can create .aws-roles in your home directory to map
+IAM roles ARNs to more easy to remember alias names, one per line, separated by spaces. Example:
+
+      myaccount-admin  arn:aws:iam::123456789012:role/myaccount-admin
+ 
+Examples
+------------
+
+### awsudo
+
+      $ awsudo arn:aws:iam::123456789012:role/myaccount-admin aws ec2 describe-tags --region us-west-2
+    
+      $ awsudo myaccount-admin aws ec2 describe-instances --region us-east-1
+
+awsudo will ask your federated credentials every time. To avoid this use aws-agent as follows:
+
+### aws-agent
+
+      $ aws-agent
+      Login: username
+      Password:
+      AWS_AUTH_SOCK=/var/folders/xz/lx178g0d0rb36x95446zwgd80000gp/T/aws-20150623-20990-58v1c4/agent; export AWS_AUTH_SOCK;
+
+then execute the commands printed by aws-agent. awsudo will now ask for temporary credentials to aws-agent.
+
+Author
+-------
+
+Gerardo Santana Gomez Garrido <gsantana@ea.com>
+
+Contributors
+-------------
+  * Matthew Wygant <mwygant@ea.com>
+  * Ivan Zenteno <izenteno@ea.com>
+  * David Hannon <dhannon@ea.com>

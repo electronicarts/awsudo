@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2015 Electronic Arts Inc.  All rights reserved.
+
+require 'awsudo'
+require 'logger'
+require 'socket'
+require 'tmpdir'
+
+def usage
+  warn <<EOS
+Usage:
+
+  #{File.basename $0}
+EOS
+  exit 1
+end
+
+config = Hash[*File.read(File.join(ENV['HOME'], '.awsudo')).
+  scan(/^(\w+)\s*=\s*(.*)$/).flatten]
+AWSUDO.config(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'])
+
+LOGFILE = File.join(ENV['HOME'], ".aws-agent.log")
+logger = Logger.new(LOGFILE, "weekly")
+logger.progname = "aws-agent"
+logger.level = Logger::WARN
+
+username, password = AWSUDO.get_federated_credentials
+
+socket_dir  = Dir.mktmpdir("aws-")
+socket_name = File.join(socket_dir, "agent")
+puts "AWS_AUTH_SOCK=#{socket_name}; export AWS_AUTH_SOCK;"
+Process.daemon
+$0 = 'aws-agent'
+Process.setrlimit(Process::RLIMIT_CORE, 0, 0)
+UNIXServer.open(socket_name) do |socket|
+  loop do
+    Thread.new(socket.accept) do |client|
+      logger.debug "thread started"
+      logger.debug "connection accepted: #{socket.inspect}"
+      begin
+        role = client.gets.strip
+        logger.debug "role received: #{role}"
+        role_arn = AWSUDO.resolve_role(role)
+        logger.debug "role ARN resolved: #{role_arn}"
+        saml_assertion = AWSUDO.get_saml_assertion(username, password)
+        credentials = AWSUDO.assume_role_with_saml(saml_assertion, role_arn)
+        client.puts credentials.to_h.to_json
+      rescue => e
+        logger.error e
+        error = {:error => e}.to_json
+        client.print error
+      ensure
+        logger.debug "Closing connection"
+        client.close
+        logger.debug "Connection closed"
+      end
+      logger.debug "Thread ending"
+    end
+  end
+end
+
+FileUtils.rmdir socket_dir

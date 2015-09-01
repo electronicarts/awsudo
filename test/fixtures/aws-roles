@@ -1,0 +1,4 @@
+role-alias-1 arn:aws:iam:1234567890:role/role1 	
+role-alias-2 	arn:aws:iam:1234567890:role/role2
+role-alias-3-empty
+role-alias-4-trailing-spaces     	

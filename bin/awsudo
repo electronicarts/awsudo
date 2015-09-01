@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2015 Electronic Arts Inc.  All rights reserved.
+
+require 'awsudo'
+
+def usage
+  warn <<-EOS
+Usage:
+
+  #{File.basename $0} {role-name | role-arn} command
+  EOS
+  exit 1
+end
+
+usage if ARGV.size < 2
+
+config = Hash[*File.read(File.join(ENV['HOME'], '.awsudo')).
+  scan(/^(\w+)\s*=\s*(.*)$/).flatten]
+AWSUDO.config(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'])
+
+role = ARGV.shift
+credentials =
+  begin
+    AWSUDO.assume_role(role)
+  rescue => e
+    warn e
+    exit 2
+  end
+
+ENV['AWS_ACCESS_KEY_ID'] = credentials['access_key_id'] || credentials[:access_key_id]
+ENV['AWS_SECRET_ACCESS_KEY'] = credentials['secret_access_key'] || credentials[:secret_access_key]
+ENV['AWS_SESSION_TOKEN'] = credentials['session_token'] || credentials[:session_token]
+
+exec *ARGV if ARGV.size > 0
