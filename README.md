@@ -70,10 +70,10 @@ then execute the commands printed by aws-agent. awsudo will now ask for temporar
 Author
 -------
 
-Gerardo Santana Gomez Garrido <gsantana@ea.com>
+[Gerardo Santana Gomez Garrido](https://github.com/santana)
 
 Contributors
 -------------
-  * Matthew Wygant <mwygant@ea.com>
-  * Ivan Zenteno <izenteno@ea.com>
-  * David Hannon <dhannon@ea.com>
+  * [Matthew Wygant](https://github.com/mkwygant)
+  * [Ivan Zenteno](https://github.com/k001)
+  * [David Hannon](https://github.com/dhannon)
