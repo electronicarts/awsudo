@@ -1,5 +1,5 @@
 PKG_NAME = 'awsudo'
-PKG_VERSION = '1.0.0'
+PKG_VERSION = '1.0.1'
 PKG_FILES = Dir['bin/*'] + ['lib/awsudo.rb'] + %w{LICENSE CHANGELOG.md CONTRIBUTING.md README.md}
 
 spec = Gem::Specification.new do |s|
