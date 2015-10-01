@@ -12,8 +12,8 @@ class TCAwsudoResolveRole < Test::Unit::TestCase
   end
 
   def test_resolve_role
-    assert_equal AWSUDO.resolve_role("role-alias-1", @roles_filename), "arn:aws:iam:1234567890:role/role1"
-    assert_equal AWSUDO.resolve_role("arn:aws:iam:1234567890:role/role2", @roles_filename), "arn:aws:iam:1234567890:role/role2"
+    assert_equal AWSUDO.resolve_role("role-alias-1", @roles_filename), "arn:aws:iam::1234567890:role/role1"
+    assert_equal AWSUDO.resolve_role("arn:aws:iam::1234567890:role/role2", @roles_filename), "arn:aws:iam::1234567890:role/role2"
     assert_raise(RuntimeError) { AWSUDO.resolve_role("role-non-existent", @roles_filename) }
     assert_raise(RuntimeError) { AWSUDO.resolve_role("role-alias-3-empty", @roles_filename) }
     assert_raise(RuntimeError) { AWSUDO.resolve_role("role-alias-4-trailing-spaces", @roles_filename) }

@@ -90,9 +90,9 @@ module AWSUDO
   end
 
   def self.resolve_role(role, roles_filename = AWS_ROLES)
-    return role if role =~ /^arn:aws:iam:\d+:role\/\S+$/
+    return role if role =~ /^arn:aws:iam::\d+:role\/\S+$/
     raise "`#{role}' is not a valid role" if role =~ /\s/
-    line = File.readlines(roles_filename).find {|line| line =~ /^#{role}\s+arn:aws:iam:\d+:role\/\S+\s*$/ }
+    line = File.readlines(roles_filename).find {|line| line =~ /^#{role}\s+arn:aws:iam::\d+:role\/\S+\s*$/ }
     raise "`#{role}' is not a valid role" if line.nil?
     role_arn = line.split(/\s+/)[1]
     raise "`#{role}' is not a valid role" if role_arn.nil?
