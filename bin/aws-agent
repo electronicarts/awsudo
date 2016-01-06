@@ -28,11 +28,16 @@ username, password = AWSUDO.get_federated_credentials
 
 socket_dir  = Dir.mktmpdir("aws-")
 socket_name = File.join(socket_dir, "agent")
-if ENV['SHELL'].split('/').last == 'fish'
+
+case ENV['SHELL'].split('/').last
+when 'csh', 'tcsh'
+  puts "setenv AWS_AUTH_SOCK #{socket_name}"
+when 'fish'
   puts "set -gx AWS_AUTH_SOCK #{socket_name}"
 else
   puts "AWS_AUTH_SOCK=#{socket_name}; export AWS_AUTH_SOCK;"
 end
+
 Process.daemon
 $0 = 'aws-agent'
 Process.setrlimit(Process::RLIMIT_CORE, 0, 0)
