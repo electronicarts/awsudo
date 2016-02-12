@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2015 Electronic Arts Inc.  All rights reserved.
 
-require 'awsudo'
+require 'eawsudo'
 require 'logger'
 require 'socket'
 require 'tmpdir'
@@ -15,7 +15,7 @@ EOS
   exit 1
 end
 
-config = Hash[*File.read(File.join(ENV['HOME'], '.awsudo')).
+config = Hash[*File.read(File.join(ENV['HOME'], '.eawsudo')).
   scan(/^(\w+)\s*=\s*(.*)$/).flatten]
 AWSUDO.config(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'])
 

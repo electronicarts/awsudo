@@ -7,5 +7,5 @@ end
 
 desc "Build gem"
 task :gem do
-  system 'gem build awsudo.gemspec'
+  system 'gem build eawsudo.gemspec'
 end

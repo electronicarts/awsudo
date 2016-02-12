@@ -3,7 +3,7 @@
 $testdir = File.expand_path(File.dirname(__FILE__))
 $LOAD_PATH.unshift File.expand_path(File.join($testdir, "..", "lib"))
 
-require 'awsudo'
+require 'eawsudo'
 require 'test/unit'
 
 class TCAwsudoResolveRole < Test::Unit::TestCase

@@ -1,21 +1,21 @@
-awsudo + aws-agent
+eawsudo + aws-agent
 ==================
 
 Overview
 ------------
 
-**awsudo** enables users to execute commands that make API calls to AWS under
+**eawsudo** enables users to execute commands that make API calls to AWS under
 the security context of an IAM role. The IAM role is assumed only upon
 successful authentication against a SAML compliant federation service.
 
 **aws-agent** enables users to authenticate against a SAML compliant federation
-service once, after which aws-agent provides temporary credentials to awsudo
+service once, after which aws-agent provides temporary credentials to eawsudo
 to use.
 
 Synopsis
 ------------
 
-      awsudo {role-name | role-arn} command
+      eawsudo {role-name | role-arn} command
      
       aws-agent
      
@@ -30,22 +30,22 @@ Requirements
 Install
 ------------
 
-      git clone https://github.com/electronicarts/awsudo.git
-      cd awsudo
-      gem build awsudo.gemspec
-      sudo gem install awsudo-<version>.gem
+      git clone https://github.com/electronicarts/eawsudo.git
+      cd eawsudo
+      gem build eawsudo.gemspec
+      sudo gem install eawsudo-<version>.gem
 
 Configuration
 ------------
 
-awsudo and aws-agent expect a configuration file named .awsudo in your home directory
+eawsudo and aws-agent expect a configuration file named .awsudo in your home directory
 containing the values for your identity provider login url and the SAML provider name
 configured in AWS. This is an example, your setup may vary:
 
       IDP_LOGIN_URL = https://sts.example.com/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices
       SAML_PROVIDER_NAME = ADFS
 
-In addition to .awsudo, you can create .aws-roles in your home directory to map
+In addition to .eawsudo, you can create .aws-roles in your home directory to map
 IAM roles ARNs to more easy to remember alias names, one per line, separated by spaces. Example:
 
       myaccount-admin  arn:aws:iam::123456789012:role/myaccount-admin
@@ -53,13 +53,13 @@ IAM roles ARNs to more easy to remember alias names, one per line, separated by 
 Examples
 ------------
 
-### awsudo
+### eawsudo
 
-      $ awsudo arn:aws:iam::123456789012:role/myaccount-admin aws ec2 describe-tags --region us-west-2
+      $ eawsudo arn:aws:iam::123456789012:role/myaccount-admin aws ec2 describe-tags --region us-west-2
     
-      $ awsudo myaccount-admin aws ec2 describe-instances --region us-east-1
+      $ eawsudo myaccount-admin aws ec2 describe-instances --region us-east-1
 
-awsudo will ask your federated credentials every time. To avoid this use aws-agent as follows:
+eawsudo will ask your federated credentials every time. To avoid this use aws-agent as follows:
 
 ### aws-agent
 
@@ -68,7 +68,7 @@ awsudo will ask your federated credentials every time. To avoid this use aws-age
       Password:
       AWS_AUTH_SOCK=/var/folders/xz/lx178g0d0rb36x95446zwgd80000gp/T/aws-20150623-20990-58v1c4/agent; export AWS_AUTH_SOCK;
 
-then execute the commands printed by aws-agent. awsudo will now ask for temporary credentials to aws-agent.
+then execute the commands printed by aws-agent. eawsudo will now ask for temporary credentials to aws-agent.
 
 Author
 -------
