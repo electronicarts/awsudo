@@ -30,10 +30,7 @@ Requirements
 Install
 ------------
 
-      git clone https://github.com/electronicarts/awsudo.git
-      cd awsudo
-      gem build awsudo.gemspec
-      sudo gem install awsudo-<version>.gem
+      sudo gem install awsudo
 
 Configuration
 ------------
