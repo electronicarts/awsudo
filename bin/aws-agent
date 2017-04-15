@@ -15,16 +15,19 @@ EOS
   exit 1
 end
 
-config = Hash[*File.read(File.join(ENV['HOME'], '.awsudo')).
-  scan(/^(\w+)\s*=\s*(.*)$/).flatten]
-AWSUDO.config(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'])
+LOG_FILENAME    = File.join(ENV['HOME'], ".aws-agent.log")
+CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
 
-LOGFILE = File.join(ENV['HOME'], ".aws-agent.log")
-logger = Logger.new(LOGFILE, "weekly")
+logger = Logger.new(LOG_FILENAME, "weekly")
 logger.progname = "aws-agent"
 logger.level = Logger::WARN
 
-username, password = AWSUDO.get_federated_credentials
+config = Hash[*File.read(CONFIG_FILENAME).
+  scan(/^(\w+)\s*=\s*(.*)$/).flatten]
+AWSUDO.idp_login_url = config['IDP_LOGIN_URL']
+AWSUDO.saml_provider_name = config['SAML_PROVIDER_NAME']
+
+username, password = AWSUDO.ask_for_credentials
 
 socket_dir  = Dir.mktmpdir("aws-")
 socket_name = File.join(socket_dir, "agent")
@@ -47,13 +50,10 @@ UNIXServer.open(socket_name) do |socket|
       logger.debug "thread started"
       logger.debug "connection accepted: #{socket.inspect}"
       begin
-        role = client.gets.strip
-        logger.debug "role received: #{role}"
-        role_arn = AWSUDO.resolve_role(role)
-        logger.debug "role ARN resolved: #{role_arn}"
-        saml_assertion = AWSUDO.get_saml_assertion(username, password)
-        credentials = AWSUDO.assume_role_with_saml(saml_assertion, role_arn)
-        client.puts credentials.to_h.to_json
+        role_arn = client.gets.strip
+        logger.debug "role ARN received: #{role_arn}"
+        credentials = AWSUDO.assume_role_with_password(role_arn, username, password)
+        client.puts credentials.to_json
       rescue => e
         logger.error e
         error = {:error => e}.to_json
