@@ -3,6 +3,10 @@
 
 require 'awsudo'
 
+CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
+ROLES_FILENAME  = File.join(ENV['HOME'], '.aws-roles')
+SOCKETNAME      = ENV['AWS_AUTH_SOCK']
+
 def usage
   warn <<-EOS
 Usage:
@@ -12,24 +16,48 @@ Usage:
   exit 1
 end
 
+def find_role_arn(rolename)
+  return nil if rolename =~ /\s/ || rolename.empty?
+  line = File.readlines(ROLES_FILENAME).find do |line|
+    line =~ /^#{rolename}\s+arn:aws:iam::\d+:role\/\S+\s*$/
+  end
+  return nil if line.nil?
+  arn = line.split(/\s+/)[1]
+  arn
+end
+
+def cuddle
+  begin; yield; rescue; warn $!; end
+end
+
+def assume_role(role_arn)
+  cuddle do
+    AWSUDO.assume_role_with_agent(role_arn, SOCKETNAME) unless SOCKETNAME.nil?
+  end || cuddle do
+    username, password = AWSUDO.ask_for_credentials
+    AWSUDO.assume_role_with_password(role_arn, username, password)
+  end
+end
+
 usage if ARGV.size < 2
 
-config = Hash[*File.read(File.join(ENV['HOME'], '.awsudo')).
-  scan(/^(\w+)\s*=\s*(.*)$/).flatten]
-AWSUDO.config(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'])
+config = Hash[*File.read(CONFIG_FILENAME).scan(/^(\w+)\s*=\s*(.*)$/).flatten]
+AWSUDO.idp_login_url = config['IDP_LOGIN_URL']
+AWSUDO.saml_provider_name = config['SAML_PROVIDER_NAME']
 
 role = ARGV.shift
-credentials =
-  begin
-    AWSUDO.assume_role(role)
-  rescue => e
-    warn e
-    exit 2
-  end
+role_arn = role =~ /^arn:aws:iam::\d+:role\/\S+$/ ? role : find_role_arn(role)
+
+if role_arn.nil?
+  warn "`#{role}' is not a valid role"
+  exit 2
+end
+
+credentials = assume_role(role_arn) || exit(3)
 
 ENV['AWS_ACCESS_KEY_ID'] = credentials['access_key_id'] || credentials[:access_key_id]
 ENV['AWS_SECRET_ACCESS_KEY'] = credentials['secret_access_key'] || credentials[:secret_access_key]
 ENV['AWS_SESSION_TOKEN'] = credentials['session_token'] || credentials[:session_token]
 ENV['AWS_SECURITY_TOKEN'] = credentials['session_token'] || credentials[:session_token] # For boto2
 
-exec *ARGV if ARGV.size > 0
+begin; exec *ARGV if ARGV.size > 0; rescue; warn $!; end
