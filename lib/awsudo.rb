@@ -11,6 +11,13 @@ require 'socket'
 require 'uri'
 
 module AWSUDO
+  def self.sts
+    return @sts unless @sts.nil?
+    @sts = Aws::STS::Client.new(
+      credentials: Aws::Credentials.new('a', 'b', 'c'),
+      region:      'us-east-1')
+  end
+
   def self.logger
     return @logger unless @logger.nil?
     @logger = Logger.new(STDERR)
@@ -47,8 +54,10 @@ module AWSUDO
     req = Net::HTTP::Post.new(uri.request_uri)
     req.set_form_data({'username' => username, 'password' => password})
     res = http.request(req)
-
     logger.debug "Location: <#{res['Location']}>"
+    logger.debug "Headers: <#{res.to_hash.inspect}>"
+    logger.debug "Body: <#{res.body.inspect}>"
+
     raise "Authentication failed" if res['Location'].nil?
     uri = URI.parse(res['Location'])
     req = Net::HTTP::Get.new(uri.request_uri)
@@ -57,6 +66,9 @@ module AWSUDO
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     res = http.request(req)
+    logger.debug "Location: <#{res['Location']}>"
+    logger.debug "Headers: <#{res.to_hash.inspect}>"
+    logger.debug "Body: <#{res.body.inspect}>"
 
     doc = REXML::Document.new(res.body)
     REXML::XPath.first(doc,
@@ -66,9 +78,6 @@ module AWSUDO
   def self.assume_role_with_saml(role_arn, saml_assertion)
     principal_arn = "#{role_arn[/^arn:aws:iam::\d+:/]}saml-provider/#{saml_provider_name}"
     logger.debug "principal_arn: <#{principal_arn}>"
-    sts = Aws::STS::Client.new(
-      credentials: Aws::Credentials.new('a', 'b', 'c'),
-      region: 'us-east-1')
     sts.assume_role_with_saml(
       role_arn: role_arn,
       principal_arn: principal_arn,
