@@ -21,6 +21,7 @@ CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
 logger = Logger.new(LOG_FILENAME, "weekly")
 logger.progname = "aws-agent"
 logger.level = Logger::WARN
+AWSUDO.logger = logger
 
 config = Hash[*File.read(CONFIG_FILENAME).
   scan(/^(\w+)\s*=\s*(.*)$/).flatten]
