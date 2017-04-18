@@ -55,9 +55,10 @@ end
 
 credentials = assume_role(role_arn) || exit(3)
 
-ENV['AWS_ACCESS_KEY_ID'] = credentials['access_key_id'] || credentials[:access_key_id]
-ENV['AWS_SECRET_ACCESS_KEY'] = credentials['secret_access_key'] || credentials[:secret_access_key]
-ENV['AWS_SESSION_TOKEN'] = credentials['session_token'] || credentials[:session_token]
+%w(access_key_id secret_access_key session_token).each do |key|
+  ENV['AWS_' + key.upcase] = credentials[key] || credentials[key.to_sym]
+end
+
 ENV['AWS_SECURITY_TOKEN'] = credentials['session_token'] || credentials[:session_token] # For boto2
 
 begin; exec *ARGV if ARGV.size > 0; rescue; warn $!; end
