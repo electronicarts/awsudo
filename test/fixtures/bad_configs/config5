@@ -1,0 +1,3 @@
+IDP = NonExistent
+IDP_LOGIN_URL = https://example.org
+SAML_PROVIDER_NAME = saml_provider

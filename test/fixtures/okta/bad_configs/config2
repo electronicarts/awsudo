@@ -1,0 +1,3 @@
+IDP = okta
+IDP_LOGIN_URL = https://missing.provider.com
+API_ENDPOINT = https://api.example.org

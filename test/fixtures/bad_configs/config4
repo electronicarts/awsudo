@@ -1,0 +1,2 @@
+IDP_LOGIN_URL = http://example.org
+SAML_PROVIDER_NAME = missing_idp_name

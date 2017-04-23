@@ -1,0 +1,2 @@
+IDP = adfs
+IDP_LOGIN_URL = https://missing.provider.com

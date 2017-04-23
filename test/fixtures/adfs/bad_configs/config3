@@ -1,0 +1,2 @@
+IDP = adfs
+SAML_PROVIDER_NAME = missing_login_url

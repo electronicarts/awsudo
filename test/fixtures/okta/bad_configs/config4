@@ -1,0 +1,3 @@
+IDP = okta
+IDP_LOGIN_URL = https://idp-login-url.example.org
+SAML_PROVIDER_NAME = missing_api_endpoint
