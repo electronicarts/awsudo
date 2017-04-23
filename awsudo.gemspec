@@ -1,11 +1,7 @@
-PKG_NAME = 'awsudo'
-PKG_VERSION = '1.0.3'
-PKG_FILES = Dir['bin/*'] + ['lib/awsudo.rb'] +
-            %w{LICENSE CHANGELOG.md CONTRIBUTING.md README.md}
-
 spec = Gem::Specification.new do |s|
-  s.name = PKG_NAME
-  s.version = PKG_VERSION
+  s.name = 'awsudo'
+  s.version = '2.0.0'
+  s.license = 'BSD-3-Clause'
   s.summary = 'executes a command with the permissions given by an AWS IAM role'
   s.description = <<-EOS
 awsudo enables users to execute commands that make API calls to AWS under the
@@ -16,8 +12,11 @@ aws-agent enables users to authenticate against a SAML compliant federation
 service once, after which aws-agent provides temporary credentials to awsudo to
 use.
   EOS
-  s.files = PKG_FILES
+  s.files = Dir['bin/*'] + ['lib/awsudo.rb'] + Dir['lib/awsudo/*.rb'] +
+            Dir['lib/awsudo/identity_providers/*.rb'] +
+            %w{LICENSE CHANGELOG.md CONTRIBUTING.md README.md}
   s.add_runtime_dependency 'aws-sdk', '~> 2'
+  s.add_runtime_dependency 'nokogiri', '~> 1.7'
   s.require_path = 'lib'
   s.executables << 'awsudo' << 'aws-agent'
   s.author = 'Gerardo Santana Gomez Garrido'
