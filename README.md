@@ -39,6 +39,7 @@ awsudo and aws-agent expect a configuration file named .awsudo in your home dire
 containing the values for your identity provider login url and the SAML provider name
 configured in AWS. This is an example, your setup may vary:
 
+      IDP = adfs
       IDP_LOGIN_URL = https://sts.example.com/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices
       SAML_PROVIDER_NAME = ADFS
 
