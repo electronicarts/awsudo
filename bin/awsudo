@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
-# Copyright (C) 2015 Electronic Arts Inc.  All rights reserved.
+# Copyright (C) 2015-2017 Electronic Arts Inc.  All rights reserved.
 
 require 'awsudo'
 
 CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
 ROLES_FILENAME  = File.join(ENV['HOME'], '.aws-roles')
 SOCKETNAME      = ENV['AWS_AUTH_SOCK']
+SUPPORTED_IDPS  = AWSUDO::IdentityProviders.constants
 
 def usage
   warn <<-EOS
@@ -30,20 +31,7 @@ def cuddle
   begin; yield; rescue; warn $!; end
 end
 
-def assume_role(role_arn)
-  cuddle do
-    AWSUDO.assume_role_with_agent(role_arn, SOCKETNAME) unless SOCKETNAME.nil?
-  end || cuddle do
-    username, password = AWSUDO.ask_for_credentials
-    AWSUDO.assume_role_with_password(role_arn, username, password)
-  end
-end
-
 usage if ARGV.size < 2
-
-config = Hash[*File.read(CONFIG_FILENAME).scan(/^(\w+)\s*=\s*(.*)$/).flatten]
-AWSUDO.idp_login_url = config['IDP_LOGIN_URL']
-AWSUDO.saml_provider_name = config['SAML_PROVIDER_NAME']
 
 role = ARGV.shift
 role_arn = role =~ /^arn:aws:iam::\d+:role\/\S+$/ ? role : find_role_arn(role)
@@ -53,12 +41,25 @@ if role_arn.nil?
   exit 2
 end
 
-credentials = assume_role(role_arn) || exit(3)
+keys = cuddle do
+  AWSUDO.assume_role_with_agent(role_arn, SOCKETNAME) unless SOCKETNAME.nil?
+end || cuddle do
+  config = Hash[*File.read(CONFIG_FILENAME).scan(/^(\w+)\s*=\s*(.*)$/).flatten]
+  idpname = config['IDP'].capitalize.to_sym
+  if !SUPPORTED_IDPS.include?(idpname)
+    raise "`#{config['IDP']}' is not a supported identity provider"
+  end
 
-%w(access_key_id secret_access_key session_token).each do |key|
-  ENV['AWS_' + key.upcase] = credentials[key] || credentials[key.to_sym]
+  username, password = AWSUDO.ask_for_credentials
+  idp = AWSUDO::IdentityProviders.new(idpname, config, username, password)
+  idp.assume_role(role_arn)
+end || exit(3)
+
+%w(access_key_id secret_access_key session_token).each do |keyname|
+  ENV['AWS_' + keyname.upcase] = keys[keyname] || keys[keyname.to_sym]
 end
 
-ENV['AWS_SECURITY_TOKEN'] = credentials['session_token'] || credentials[:session_token] # For boto2
+# for boto2
+ENV['AWS_SECURITY_TOKEN'] = keys['session_token'] || keys[:session_token]
 
-begin; exec *ARGV if ARGV.size > 0; rescue; warn $!; end
+cuddle { exec *ARGV if ARGV.size > 0 }
