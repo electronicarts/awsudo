@@ -1,11 +1,15 @@
+require 'rake/testtask'
+require 'rubygems/package'
+
 task :default => :test
 
 desc "Test unit"
 task :test do
-  system 'test/tc_resolve_role.rb'
+  load 'test/test_suite.rb'
 end
 
 desc "Build gem"
 task :gem do
-  system 'gem build awsudo.gemspec'
+  spec = Gem::Specification.load('awsudo.gemspec')
+  Gem::Package.build spec
 end
