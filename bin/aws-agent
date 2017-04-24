@@ -25,7 +25,7 @@ logger.progname = "aws-agent"
 logger.level = Logger::WARN
 
 config = Hash[*File.read(CONFIG_FILENAME).scan(/^(\w+)\s*=\s*(.*)$/).flatten]
-idpname = config['IDP'].capitalize.to_sym
+idpname = config['IDP'].to_s.capitalize.to_sym
 if !SUPPORTED_IDPS.include?(idpname)
   warn "#{config['IDP']} is not a supported identity provider"
   exit 4
