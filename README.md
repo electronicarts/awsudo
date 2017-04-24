@@ -1,6 +1,8 @@
 awsudo + aws-agent
 ==================
 
+[![Build Status](https://travis-ci.org/electronicarts/awsudo.svg?branch=master)](https://travis-ci.org/electronicarts/awsudo)
+
 Overview
 ------------
 
