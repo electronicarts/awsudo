@@ -20,7 +20,7 @@ class TCAwsudoAdfs < Test::Unit::TestCase
 
   def test_new_identity_provider
     @bad_configs.each do |config|
-      assert_raise do
+      assert_raise(RuntimeError) do
         AWSUDO::IdentityProviders::Adfs.new(
           config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'],
           'username', 'password')

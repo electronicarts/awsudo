@@ -24,16 +24,16 @@ class TCAwsudoIdentityProvider < Test::Unit::TestCase
 
   def test_new_identity_provider
     @bad_configs.each do |config|
-      assert_raise do
+      assert_raise(RuntimeError) do
         AWSUDO::IdentityProviders.new(
-          config['IDP'].capitalize.to_sym, config, 'username', 'password')
+          config['IDP'].to_s.capitalize.to_sym, config, 'username', 'password')
       end
     end
 
     @good_configs.each do |config|
       assert_nothing_raised do
         AWSUDO::IdentityProviders.new(
-          config['IDP'].capitalize.to_sym, config, 'username', 'password')
+          config['IDP'].to_s.capitalize.to_sym, config, 'username', 'password')
       end
     end
   end
@@ -41,7 +41,7 @@ class TCAwsudoIdentityProvider < Test::Unit::TestCase
   def test_state
     config = @good_configs.first
     idp = AWSUDO::IdentityProviders.new(
-      config['IDP'].capitalize.to_sym, config, 'username', 'password')
+      config['IDP'].to_s.capitalize.to_sym, config, 'username', 'password')
 
     assert_equal idp.idp_login_url, config['IDP_LOGIN_URL']
     assert_equal idp.saml_provider_name, config['SAML_PROVIDER_NAME']
