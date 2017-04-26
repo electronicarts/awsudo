@@ -27,7 +27,7 @@ Requirements
   * UNIX, UNIX-like or GNU/Linux operating system
   * SAML compliant federation service
   * ruby 1.9 or above
-  * ruby gems: aws-sdk
+  * ruby gems: aws-sdk, nokogiri
 
 Install
 ------------
