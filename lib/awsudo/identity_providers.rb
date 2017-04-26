@@ -3,18 +3,7 @@
 module AWSUDO
   module IdentityProviders
     def self.new(idpname, config, username, password)
-      case idpname
-        when :Adfs
-          idp = AWSUDO::IdentityProviders::Adfs.
-                  new(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'],
-                    username, password)
-        when :Okta
-          idp = AWSUDO::IdentityProviders::Okta.
-                  new(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'],
-                      config['API_ENDPOINT'], username, password)
-        else
-          raise "#{idpname.to_s} is not a supported identity provider"
-      end
+      self.const_get(idpname).new_from_config(config, username, password)
     end
   end
 end

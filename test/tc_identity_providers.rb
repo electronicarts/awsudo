@@ -24,7 +24,7 @@ class TCAwsudoIdentityProvider < Test::Unit::TestCase
 
   def test_new_identity_provider
     @bad_configs.each do |config|
-      assert_raise(RuntimeError) do
+      assert_raise(RuntimeError, NameError) do
         AWSUDO::IdentityProviders.new(
           config['IDP'].to_s.capitalize.to_sym, config, 'username', 'password')
       end

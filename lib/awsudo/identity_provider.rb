@@ -20,6 +20,11 @@ module AWSUDO
         region:      'us-east-1')
     end
 
+    def self.new_from_config(config, username, password)
+      new(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'],
+               username, password)
+    end
+
     def logger
       AWSUDO.logger
     end

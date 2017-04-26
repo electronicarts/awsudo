@@ -7,10 +7,14 @@ module AWSUDO
     class Okta < IdentityProvider
       attr_accessor :api_endpoint
 
-      def initialize(idp_login_url, saml_provider_name, api_endpoint,
-                   username, password)
-        super(idp_login_url, saml_provider_name, username, password)
-        @api_endpoint = api_endpoint
+      def self.new_from_config(config, username, password)
+        new(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'],
+            config['API_ENDPOINT'], username, password)
+      end
+
+      def initialize(url, name, endpoint, username, password)
+        super(url, name, username, password)
+        @api_endpoint = endpoint
         logger.debug "api_endpoint: <#{@api_endpoint}>"
         begin
           URI.parse(@api_endpoint)
