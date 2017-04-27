@@ -17,17 +17,17 @@ to use.
 Synopsis
 ------------
 
-      awsudo {role-name | role-arn} command
+    awsudo {role-name | role-arn} command
      
-      aws-agent
+    aws-agent
      
 Requirements
 ------------
 
   * UNIX, UNIX-like or GNU/Linux operating system
   * SAML compliant federation service
-  * ruby 1.9 or above
-  * ruby gems: aws-sdk, nokogiri
+  * ruby 2.1 or above
+  * rubygems: aws-sdk, nokogiri
 
 Install
 ------------
@@ -39,34 +39,43 @@ Configuration
 
 awsudo and aws-agent expect a configuration file named .awsudo in your home directory
 containing the values for your identity provider login url and the SAML provider name
-configured in AWS. This is an example, your setup may vary:
+configured in AWS.
 
-      IDP = adfs
-      IDP_LOGIN_URL = https://sts.example.com/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices
-      SAML_PROVIDER_NAME = ADFS
+Example for AD FS:
+
+    IDP = adfs
+    IDP_LOGIN_URL = https://sts.example.com/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices
+    SAML_PROVIDER_NAME = adfs
+
+Example for Okta:
+
+    IDP = okta
+    IDP_LOGIN_URL = https://example.okta.com/app/example/abc123/sso/saml
+    SAML_PROVIDER_NAME = okta
+    API_ENDPOINT = https://example.okta.com/api/v1
 
 In addition to .awsudo, you can create .aws-roles in your home directory to map
 IAM roles ARNs to more easy to remember alias names, one per line, separated by spaces. Example:
 
-      myaccount-admin  arn:aws:iam::123456789012:role/myaccount-admin
+    myaccount-admin  arn:aws:iam::123456789012:role/myaccount-admin
  
 Examples
 ------------
 
 ### awsudo
 
-      $ awsudo arn:aws:iam::123456789012:role/myaccount-admin aws ec2 describe-tags --region us-west-2
-    
-      $ awsudo myaccount-admin aws ec2 describe-instances --region us-east-1
+    $ awsudo arn:aws:iam::123456789012:role/myaccount-admin aws ec2 describe-tags --region us-west-2
+     
+    $ awsudo myaccount-admin aws ec2 describe-instances --region us-east-1
 
 awsudo will ask your federated credentials every time. To avoid this use aws-agent as follows:
 
 ### aws-agent
 
-      $ aws-agent
-      Login: username
-      Password:
-      AWS_AUTH_SOCK=/var/folders/xz/lx178g0d0rb36x95446zwgd80000gp/T/aws-20150623-20990-58v1c4/agent; export AWS_AUTH_SOCK;
+    $ aws-agent
+    Login: username
+    Password:
+    AWS_AUTH_SOCK=/var/folders/xz/lx178g0d0rb36x95446zwgd80000gp/T/aws-20150623-20990-58v1c4/agent; export AWS_AUTH_SOCK;
 
 then execute the commands printed by aws-agent. awsudo will now ask for temporary credentials to aws-agent.
 
