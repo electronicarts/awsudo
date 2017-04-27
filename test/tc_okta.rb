@@ -13,7 +13,7 @@ class TCAwsudoOkta < Test::Unit::TestCase
       filenames = Dir[File.join(fixturesdir, name, '*')]
       instance_variable_set("@#{name}",
         filenames.map do |filename|
-          Hash[*File.read(filename).scan(/^(\w+)\s*=\s*(.*)$/).flatten]
+          AWSUDO.load_config(filename)
         end)
     end
   end
@@ -36,7 +36,7 @@ class TCAwsudoOkta < Test::Unit::TestCase
     end
   end
 
-  def test_idp_login_url
+  def test_state
     config = @good_configs.first
     idp = AWSUDO::IdentityProviders::Okta.new(
       config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'],
@@ -46,5 +46,6 @@ class TCAwsudoOkta < Test::Unit::TestCase
     assert_equal idp.saml_provider_name, config['SAML_PROVIDER_NAME']
     assert_equal idp.username, 'username'
     assert_equal idp.password, 'password'
+    assert_equal idp.logger, AWSUDO.logger
   end
 end

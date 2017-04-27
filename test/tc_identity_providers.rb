@@ -13,7 +13,7 @@ class TCAwsudoIdentityProvider < Test::Unit::TestCase
       filenames = Dir[File.join(fixturesdir, name, '*')]
       instance_variable_set("@#{name}",
         filenames.map do |filename|
-          Hash[*File.read(filename).scan(/^(\w+)\s*=\s*(.*)$/).flatten]
+          AWSUDO.load_config(filename)
         end)
     end
   end
@@ -48,5 +48,6 @@ class TCAwsudoIdentityProvider < Test::Unit::TestCase
     assert_equal idp.username, 'username'
     assert_equal idp.password, 'password'
     assert_kind_of Aws::STS::Client, idp.class.sts
+    assert_equal idp.logger, AWSUDO.logger
   end
 end
