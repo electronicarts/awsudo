@@ -11,7 +11,8 @@ require 'awsudo'
 
 module AWSUDO
   class IdentityProvider
-    attr_accessor :idp_login_url, :saml_provider_name, :username, :password
+    attr_accessor :idp_login_url, :saml_provider_name
+    attr_accessor :username, :password, :logger
 
     def self.sts
       return @sts unless @sts.nil?
@@ -25,19 +26,12 @@ module AWSUDO
                username, password)
     end
 
-    def logger
-      AWSUDO.logger
-    end
-
-    def logger=(logger)
-      AWSUDO.logger = logger
-    end
-
     def initialize(url, name, username, password)
       @idp_login_url = url
       @saml_provider_name = name
       @username = username
       @password = password
+      @logger   = AWSUDO.logger
       begin
         URI.parse @idp_login_url
       rescue
