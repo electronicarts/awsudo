@@ -7,15 +7,11 @@ require 'socket'
 require 'uri'
 
 module AWSUDO
-  def self.logger
-    return @logger unless @logger.nil?
-    @logger = Logger.new(STDERR)
-    @logger.level = Logger::WARN
-    @logger
-  end
+  @logger = Logger.new(STDERR)
+  @logger.level = Logger::WARN
 
-  def self.logger=(logger)
-    @logger = logger
+  class << self
+    attr_accessor :logger
   end
 
   def self.assume_role_with_agent(role_arn, socket_name)
@@ -42,6 +38,12 @@ module AWSUDO
     password = STDIN.noecho(&:gets).chomp
     console.print "\n"
     [username, password]
+  end
+
+  def self.load_config(filename)
+    config = Hash[*File.read(filename).scan(/^\s*(\w+)\s*=\s*(.*)\s*$/).flatten]
+    logger.debug { "config: <#{config.inspect}>" }
+    config
   end
 end
 
