@@ -37,6 +37,7 @@ module AWSUDO
     console.print "Password: "
     password = STDIN.noecho(&:gets).chomp
     console.print "\n"
+    IO.new(fd).close
     [username, password]
   end
 
