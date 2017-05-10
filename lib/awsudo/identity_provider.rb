@@ -11,14 +11,14 @@ require 'awsudo'
 
 module AWSUDO
   class IdentityProvider
+    @@sts = Aws::STS::Client.new(
+      credentials: Aws::Credentials.new('a', 'b', 'c'), region: 'us-east-1')
+
     attr_accessor :idp_login_url, :saml_provider_name
     attr_accessor :username, :password, :logger
 
-    def self.sts
-      return @sts unless @sts.nil?
-      @sts = Aws::STS::Client.new(
-        credentials: Aws::Credentials.new('a', 'b', 'c'),
-        region:      'us-east-1')
+    def sts
+      @@sts
     end
 
     def self.new_from_config(config, username, password)
@@ -82,7 +82,7 @@ module AWSUDO
       if saml_assertion.empty?
         raise 'Unable to get SAML assertion (failed authentication?)'
       end
-      self.class.sts.assume_role_with_saml(
+      sts.assume_role_with_saml(
         role_arn: role_arn,
         principal_arn: principal_arn,
         saml_assertion: saml_assertion).credentials.to_h
