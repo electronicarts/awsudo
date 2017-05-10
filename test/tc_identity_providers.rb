@@ -6,7 +6,7 @@ $LOAD_PATH.unshift File.expand_path(File.join($testdir, "..", "lib"))
 require 'awsudo'
 require 'test/unit'
 
-class TCAwsudoIdentityProvider < Test::Unit::TestCase
+class TCAwsudoIdentityProviders < Test::Unit::TestCase
   def setup
     fixturesdir = File.join($testdir, 'fixtures')
     %w(good_configs bad_configs).each do |name|
@@ -47,7 +47,7 @@ class TCAwsudoIdentityProvider < Test::Unit::TestCase
     assert_equal idp.saml_provider_name, config['SAML_PROVIDER_NAME']
     assert_equal idp.username, 'username'
     assert_equal idp.password, 'password'
-    assert_kind_of Aws::STS::Client, idp.class.sts
+    assert_kind_of Aws::STS::Client, idp.sts
     assert_equal idp.logger, AWSUDO.logger
   end
 end
