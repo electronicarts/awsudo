@@ -10,6 +10,9 @@ require 'uri'
 require 'awsudo'
 
 module AWSUDO
+  # I'm the abstract class for all identity providers.
+  # I provide common methods for requesting a SAML assertion to an IdP
+  # and for requesting with it a set of temporary keys to AWS STS.
   class IdentityProvider
     @@sts = Aws::STS::Client.new(
       credentials: Aws::Credentials.new('a', 'b', 'c'), region: 'us-east-1')
@@ -21,11 +24,14 @@ module AWSUDO
       @@sts
     end
 
+    # Creates an instance of an IdentityProvider subclass
+    # from the given settings
     def self.new_from_config(config, username, password)
       new(config['IDP_LOGIN_URL'], config['SAML_PROVIDER_NAME'],
                username, password)
     end
 
+    # Initializes the instance with the given settings.
     def initialize(url, name, username, password)
       @idp_login_url = url
       @saml_provider_name = name
@@ -42,10 +48,13 @@ module AWSUDO
       end
     end
 
+    # Builds an HTTP request object for retrieving a SAML assertion.
+    # It is the subclass responsibility to define this method.
     def saml_request
       raise "should be implemented by subclass"
     end
 
+    # Retrieves the SAML assertion from the IdP
     def get_saml_response
       req = saml_request
       res = nil
@@ -72,6 +81,7 @@ module AWSUDO
       doc.xpath('/html/body//form/input[@name = "SAMLResponse"]/@value').to_s
     end
 
+    # Retrieves a set of temporary keys from AWS STS
     def assume_role(role_arn)
       logger.debug {"role_arn: <#{role_arn}>"}
       base_arn = role_arn[/^arn:aws:iam::\d+:/]

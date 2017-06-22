@@ -6,6 +6,7 @@ require 'logger'
 require 'socket'
 require 'uri'
 
+# I'm the namespace for the awsudo library.
 module AWSUDO
   @logger = Logger.new(STDERR)
   @logger.level = Logger::WARN
@@ -14,6 +15,9 @@ module AWSUDO
     attr_accessor :logger
   end
 
+  # Asks the aws-agent through socket_name to assume role_arn.
+  # It expects a JSON response with either an error message or
+  # AWS temporary keys.
   def self.assume_role_with_agent(role_arn, socket_name)
     logger.debug {"role_arn: <#{role_arn}>"}
     logger.debug {"socket_name: <#{socket_name}>"}
@@ -29,6 +33,7 @@ module AWSUDO
     keys
   end
 
+  # Asks the user interactively for username and password
   def self.ask_for_credentials
     fd = IO.sysopen("/dev/tty", "w")
     console = IO.new(fd,"w")
@@ -41,6 +46,7 @@ module AWSUDO
     [username, password]
   end
 
+  # Retrieves awsudo's settings from filename
   def self.load_config(filename)
     config = Hash[*File.read(filename).scan(/^\s*(\w+)\s*=\s*(.*)\s*$/).flatten]
     logger.debug { "config: <#{config.inspect}>" }
