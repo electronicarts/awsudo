@@ -1,28 +1,82 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2015-2017 Electronic Arts Inc.  All rights reserved.
-
 require 'logger'
 require 'socket'
 require 'tmpdir'
-
+require 'optparse'
 require 'awsudo'
+trap("SIGINT") { exit 4 }
+Version = "2.0.1"
 
-def usage
-  warn <<EOS
-Usage:
+OptionParser.new do |opts|
+  opts.banner = "AWS Agent:
+  Enables users to authenticate against a SAML compliant federation service once,
+  after which aws-agent provides temporary credentials to awsudo to use."
+  opts.define_head "Usage: #{File.basename $0} [options]"
+  opts.separator ""
+  opts.on("-?", "--help", "Show this message") do |v|
+    puts opts
+    exit
+  end
 
-  #{File.basename $0}
-EOS
-  exit 1
+  opts.on_tail("--version", "Show version") do |v|
+    puts opts.banner
+    puts "Version: " + Version
+    exit
+  end
+
+  opts.on_tail("--debug", "Enable Debug mode") do |v|
+    @debug = v
+  end
+
+  opts.on_tail("-C file", "Specifies awsudo initialization file to load default:
+                                     ${HOME}/.awsudo") do |v|
+    @config = v
+  end
+
+  opts.on_tail("-l file", "Specifies log pathfile default:
+                                     ${HOME}/.aws-agent.log") do |v|
+    @logfile = v
+  end
+
+  opts.on("-t", "--time seconds", OptionParser::DecimalInteger,
+          "Lifetime in seconds (default forever)") do |v|
+    @timeout = v
+  end
+end.parse!
+
+if @config
+  if File.file?(@config)
+    CONFIG_FILENAME = @config
+  else
+    warn "#{@config} is not a text file"
+    exit 4
+  end
+else
+  CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
 end
 
-LOG_FILENAME    = File.join(ENV['HOME'], ".aws-agent.log")
-CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
-SUPPORTED_IDPS  = AWSUDO::IdentityProviders.constants
+if @logfile
+  if File.file?(@logfile)
+    LOG_FILENAME = @logfile
+  else
+    warn "#{@logfile} is not regular file"
+    exit 4
+  end
+else
+  LOG_FILENAME = File.join(ENV['HOME'], ".aws-agent.log")
+end
+
+SUPPORTED_IDPS = AWSUDO::IdentityProviders.constants
+
+
+def cuddle
+  begin; yield; rescue; warn $!; end
+end
 
 logger = Logger.new(LOG_FILENAME, "weekly")
 logger.progname = "aws-agent"
-logger.level = Logger::WARN
+logger.level = @debug ? Logger::DEBUG : Logger::WARN
 
 config = AWSUDO.load_config(CONFIG_FILENAME)
 idpname = config['IDP'].to_s.capitalize.to_sym
@@ -30,12 +84,15 @@ unless SUPPORTED_IDPS.include?(idpname)
   warn "`#{config['IDP']}' is not a supported identity provider"
   exit 4
 end
+
 username, password = AWSUDO.ask_for_credentials
 idp = AWSUDO::IdentityProviders.new(idpname, config, username, password)
 idp.logger = logger
 
 socket_dir  = Dir.mktmpdir("aws-")
 socket_name = File.join(socket_dir, "agent")
+
+puts "Lifetime set to #{@timeout} seconds"
 
 case ENV['SHELL'].split('/').last
 when 'csh', 'tcsh'
@@ -51,6 +108,15 @@ $0 = 'aws-agent'
 Process.setrlimit(Process::RLIMIT_CORE, 0, 0)
 UNIXServer.open(socket_name) do |socket|
   loop do
+    if @timeout
+      timesession = Time.now().to_i + @timeout
+      logger.debug {"TIME SESSION: #{timesession}"}
+      if timesession < Time.now().to_i
+        logger.debug {"Timeout! session was expired"}
+        warn "#{File.basename $0} session expired"
+        break
+      end
+    end
     Thread.new(socket.accept) do |client|
       logger.debug "Thread started"
       logger.debug {"connection accepted: #{socket.inspect}"}

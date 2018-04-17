@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = 'awsudo'
-  s.version = '2.0.0'
+  s.version = '2.0.2'
   s.license = 'BSD-3-Clause'
   s.summary = 'executes a command with the permissions given by an AWS IAM role'
   s.description = <<-EOS
