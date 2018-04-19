@@ -2,9 +2,7 @@
 # Copyright (C) 2015-2017 Electronic Arts Inc.  All rights reserved.
 
 require 'awsudo'
-trap("SIGINT") { exit 4 }
 
-FILENAME        = ENV['AWSUDO_CONFIGFILE'] ? ENV['AWSUDO_CONFIGFILE'] : '.awsudo'
 CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
 ROLES_FILENAME  = File.join(ENV['HOME'], '.aws-roles')
 SOCKETNAME      = ENV['AWS_AUTH_SOCK']
@@ -15,7 +13,6 @@ def usage
 Usage:
 
   #{File.basename $0} {role-name | role-arn} command
-  Define ENV AWSUDO_CONFIGFILE to overrite .awsudo config file
   EOS
   exit 1
 end
