@@ -3,8 +3,8 @@
 
 require 'awsudo'
 
-CONFIG_FILENAME = ENV['AWSUDO_CONFIGFILE'] ? ENV['AWSUDO_CONFIGFILE'] : File.join(ENV['HOME'], '.awsudo')
-ROLES_FILENAME  = ENV['ROLES_CONFIGFILE'] ? ENV['ROLES_CONFIGFILE'] : File.join(ENV['HOME'], '.aws-roles')
+CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
+ROLES_FILENAME  = File.join(ENV['HOME'], '.aws-roles')
 SOCKETNAME      = ENV['AWS_AUTH_SOCK']
 SUPPORTED_IDPS  = AWSUDO::IdentityProviders.constants
 

@@ -17,7 +17,7 @@ EOS
 end
 
 LOG_FILENAME    = File.join(ENV['HOME'], ".aws-agent.log")
-CONFIG_FILENAME = ENV['AWSUDO_CONFIGFILE'] ? ENV['AWSUDO_CONFIGFILE'] : File.join(ENV['HOME'], '.awsudo')
+CONFIG_FILENAME = File.join(ENV['HOME'], '.awsudo')
 SUPPORTED_IDPS  = AWSUDO::IdentityProviders.constants
 
 logger = Logger.new(LOG_FILENAME, "weekly")
