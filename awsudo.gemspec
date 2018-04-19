@@ -14,7 +14,6 @@ use.
   EOS
   s.files = Dir['bin/*'] + ['lib/awsudo.rb'] + Dir['lib/awsudo/*.rb'] +
             Dir['lib/awsudo/identity_providers/*.rb'] +
-            Dir['lib/awsudo/identity_providers/okta/*.rb'] +
             %w{LICENSE CHANGELOG.md CONTRIBUTING.md README.md}
   s.add_runtime_dependency 'aws-sdk', '~> 2'
   s.add_runtime_dependency 'nokogiri', '~> 1.7'
