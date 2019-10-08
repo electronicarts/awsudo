@@ -37,7 +37,7 @@ idp.logger = logger
 socket_dir  = Dir.mktmpdir("aws-")
 socket_name = File.join(socket_dir, "agent")
 
-case ENV['SHELL'].split('/').last
+case ENV.fetch("SHELL", "bash").split("/").last
 when 'csh', 'tcsh'
   puts "setenv AWS_AUTH_SOCK #{socket_name}"
 when 'fish'
